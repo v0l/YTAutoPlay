@@ -1,5 +1,5 @@
-// V0.4.4 - Youtube smart playlist
-// 2015-04-29
+// V0.4.5 - Youtube smart playlist
+// 2015-11-04
 //
 // ABOUT:
 //		This script is designed to play all unwatched videos that are loaded on the page
@@ -27,6 +27,7 @@
 //		V0.4.2	(2015-02-16) * Fixed bug with load more button max.
 //		V0.4.3	(2015-04-16) * Class name for videos changed
 //		V0.4.4	(2015-04-29) * Added video link to window
+//		V0.4.5	(2015-11-04) * Added video count to video title
 
 var YTPlay = {
 	vidClass: "yt-lockup-thumbnail contains-addto",
@@ -61,7 +62,7 @@ var YTPlay = {
 		if(state.current >= state.duration){
 			YTPlay.next();
 		}else{
-			YTPlay.status("Now playing: <a href=\"https://youtube.com/watch?v=" + data.video_id + "\" target=\"_blank\">" + (data.title.length > 50 ? data.title.substring(0,50) + "..." : data.title) + " (" + YTPlay.paseTime(state.current) + " / " + YTPlay.paseTime(state.duration) + ")</a>");
+			YTPlay.status("Now playing: <a href=\"https://youtube.com/watch?v=" + data.video_id + "\" target=\"_blank\">" + (data.title.length > 50 ? data.title.substring(0,50) + "..." : data.title) + " (" + YTPlay.paseTime(state.current) + " / " + YTPlay.paseTime(state.duration) + ")</a> <small>(" + YTPlay.cvid + "/" + YTPlay.vids.length + ")</small>");
 		}
 	},
 	loadMore: function(){
