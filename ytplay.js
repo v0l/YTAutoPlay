@@ -1,5 +1,5 @@
-// V0.4.5 - Youtube smart playlist
-// 2015-11-04
+// V0.4.6 - Youtube smart playlist
+// 2015-11-18
 //
 // ABOUT:
 //		This script is designed to play all unwatched videos that are loaded on the page
@@ -28,6 +28,7 @@
 //		V0.4.3	(2015-04-16) * Class name for videos changed
 //		V0.4.4	(2015-04-29) * Added video link to window
 //		V0.4.5	(2015-11-04) * Added video count to video title
+//		V0.4.6	(2015-11-18) * Fixed icon links
 
 var YTPlay = {
 	vidClass: "yt-lockup-thumbnail contains-addto",
@@ -104,7 +105,7 @@ var YTPlay = {
 	pause: function(){
 		//Change button styles
 		var btn = document.getElementById("pauseButton");
-		btn.style.backgroundPosition = "-141px -141px";
+		btn.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_play_arrow_white_24dp.png')";
 		btn.onclick = function() { YTPlay.resume(); };
 		
 		YTPlay.paused = true;
@@ -114,7 +115,7 @@ var YTPlay = {
 		if(YTPlay.paused){
 			//Change button styles
 			var btn = document.getElementById("pauseButton");
-			btn.style.backgroundPosition = "-5px -141px";
+			btn.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_pause_white_24dp.png')";
 			btn.onclick  = function() { YTPlay.pause(); };
 			
 			YTPlay.paused = false;
@@ -136,7 +137,7 @@ var YTPlay = {
 			var v = YTPlay.vids[YTPlay.cvid];
 			
 			var btn = document.getElementById("pauseButton");
-			btn.style.backgroundPosition = "-5px -141px";
+			btn.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_pause_white_24dp.png')";
 			btn.onclick  = function() { YTPlay.pause(); };
 	
 			document.getElementById("playerFrame").src = "https://www.youtube.com/embed/" + v + "?autoplay=1&controls=0&enablejsapi=1";
@@ -194,8 +195,7 @@ var YTPlay = {
 		
 		//Prev
 		var pr = document.createElement('div');
-		pr.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/sprites/css-sprite/sprite-navigation-white.png')";
-		pr.style.backgroundPosition = "-73px -73px";
+		pr.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/navigation/1x_web/ic_chevron_left_white_24dp.png')";
 		pr.style.width = "24px";
 		pr.style.height = "24px";
 		pr.style.float = "left";
@@ -206,8 +206,7 @@ var YTPlay = {
 		//Pause
 		var ps = document.createElement('div');
 		ps.id = "pauseButton";
-		ps.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/sprites/css-sprite/sprite-av-white.png')";
-		ps.style.backgroundPosition = "-5px -141px"; //-141px -141px;
+		ps.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_play_arrow_white_24dp.png')";
 		ps.style.width = "24px";
 		ps.style.height = "24px";
 		ps.style.float = "left";
@@ -216,8 +215,7 @@ var YTPlay = {
 		
 		//Skip
 		var sk = document.createElement('div');
-		sk.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/sprites/css-sprite/sprite-navigation-white.png')";
-		sk.style.backgroundPosition = "-107px -5px";
+		sk.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/navigation/1x_web/ic_chevron_right_white_24dp.png')";
 		sk.style.width = "24px";
 		sk.style.height = "24px";
 		sk.style.float = "left";
