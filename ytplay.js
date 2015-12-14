@@ -1,4 +1,4 @@
-// V0.4.7 - Youtube smart playlist
+// V0.4.6 - Youtube smart playlist
 // 2015-12-14
 //
 // ABOUT:
@@ -49,7 +49,7 @@ var YTPlay = {
 	
 	getPlayer: function() {
 		var ytplayer_window = document.getElementById("playerFrame").contentWindow;
-		return ytplayer_window.yt.player.getPlayerByElement(ytplayer_window.player);
+		return ytplayer_window.yt !== null ? ytplayer_window.yt.player.getPlayerByElement(ytplayer_window.player) : null;
 	},
 	paseTime: function(sec){
 		var mins = Math.floor(sec / 60.0);
@@ -144,8 +144,14 @@ var YTPlay = {
 			var btn = document.getElementById("pauseButton");
 			btn.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_pause_white_24dp.png')";
 			btn.onclick  = function() { YTPlay.pause(); };
-	
-			YTPlay.getPlayer().playVideo(v);
+			
+			var pl = YTPlay.getPlayer();
+			if(pl === null){
+				document.getElementById("playerFrame").src = "https://www.youtube.com/embed/" + v + "?autoplay=1&controls=0&enablejsapi=1";
+			}else{
+				YTPlay.getPlayer().playVideo(v);
+			}
+			
 			YTPlay.cvid--;
 		}else{
 			YTPlay.status("All vids watched - removing embedded controls");
