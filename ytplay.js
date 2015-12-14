@@ -1,5 +1,5 @@
 // V0.4.6 - Youtube smart playlist
-// 2015-11-18
+// 2015-12-14
 //
 // ABOUT:
 //		This script is designed to play all unwatched videos that are loaded on the page
@@ -29,6 +29,8 @@
 //		V0.4.4	(2015-04-29) * Added video link to window
 //		V0.4.5	(2015-11-04) * Added video count to video title
 //		V0.4.6	(2015-11-18) * Fixed icon links
+//		V0.4.7	(2015-12-14) * Added null check for ytplayer in tick function
+//							 * Removed iframe url change, used build in playVideo function
 
 var YTPlay = {
 	vidClass: "yt-lockup-thumbnail contains-addto",
@@ -57,13 +59,16 @@ var YTPlay = {
 	},
 	tick: function() {
 		var ytplayer = YTPlay.getPlayer();
-		var state = ytplayer.getProgressState();
-		var data = ytplayer.getVideoData();
-		
-		if(state.current >= state.duration){
-			YTPlay.next();
-		}else{
-			YTPlay.status("Now playing: <a href=\"https://youtube.com/watch?v=" + data.video_id + "\" target=\"_blank\">" + (data.title.length > 50 ? data.title.substring(0,50) + "..." : data.title) + " (" + YTPlay.paseTime(state.current) + " / " + YTPlay.paseTime(state.duration) + ")</a> <small>(" + YTPlay.cvid + "/" + YTPlay.vids.length + ")</small>");
+		if(ytplayer !== undefined && ytplayer !== null)
+		{
+			var state = ytplayer.getProgressState();
+			var data = ytplayer.getVideoData();
+			
+			if(state.current >= state.duration){
+				YTPlay.next();
+			}else{
+				YTPlay.status("Now playing: <a href=\"https://www.youtube.com/watch?v=" + data.video_id + "\" target=\"_blank\">" + (data.title.length > 50 ? data.title.substring(0,50) + "..." : data.title) + " (" + YTPlay.paseTime(state.current) + " / " + YTPlay.paseTime(state.duration) + ")</a> <small>(" + YTPlay.cvid + "/" + YTPlay.vids.length + ")</small>");
+			}
 		}
 	},
 	loadMore: function(){
@@ -140,7 +145,7 @@ var YTPlay = {
 			btn.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_pause_white_24dp.png')";
 			btn.onclick  = function() { YTPlay.pause(); };
 	
-			document.getElementById("playerFrame").src = "https://www.youtube.com/embed/" + v + "?autoplay=1&controls=0&enablejsapi=1";
+			YTPlay.getPlayer().playVideo(v);
 			YTPlay.cvid--;
 		}else{
 			YTPlay.status("All vids watched - removing embedded controls");
