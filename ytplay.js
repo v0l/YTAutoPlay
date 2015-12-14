@@ -1,4 +1,4 @@
-// V0.4.6 - Youtube smart playlist
+// V0.4.7 - Youtube smart playlist
 // 2015-12-14
 //
 // ABOUT:
