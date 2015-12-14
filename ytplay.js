@@ -49,7 +49,7 @@ var YTPlay = {
 	
 	getPlayer: function() {
 		var ytplayer_window = document.getElementById("playerFrame").contentWindow;
-		return ytplayer_window.yt.player !== null ? ytplayer_window.yt.player.getPlayerByElement(ytplayer_window.player) : null;
+		return ytplayer_window.yt !== undefined ? ytplayer_window.yt.player.getPlayerByElement(ytplayer_window.player) : null;
 	},
 	paseTime: function(sec){
 		var mins = Math.floor(sec / 60.0);
