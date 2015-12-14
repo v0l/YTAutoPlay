@@ -149,7 +149,7 @@ var YTPlay = {
 			if(pl === null){
 				document.getElementById("playerFrame").src = "https://www.youtube.com/embed/" + v + "?autoplay=1&controls=0&enablejsapi=1";
 			}else{
-				YTPlay.getPlayer().playVideo(v);
+				YTPlay.getPlayer().loadVideoById(v);
 			}
 			
 			YTPlay.cvid--;
