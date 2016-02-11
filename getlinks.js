@@ -18,6 +18,10 @@ tx.style.marginLeft = "auto";
 tx.style.marginRight = "auto";
 tx.style.padding = "10px";
 tx.style.borderRadius = "4px";
+tx.style.maxHeight = (body.offsetHeight - 40) + "px";
+tx.style.overflowY = "auto";
+tx.style.zIndex = "999999999999";
+tx.onclick = function(e) { e.preventDefault();e.stopPropagation(); }
 tx.innerHTML = lk;
 
 bg.appendChild(tx);
