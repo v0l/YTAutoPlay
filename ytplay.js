@@ -1,5 +1,5 @@
-// V0.4.6 - Youtube smart playlist
-// 2015-12-14
+// V0.4.8 - Youtube smart playlist
+// 2016-11-24
 //
 // ABOUT:
 //		This script is designed to play all unwatched videos that are loaded on the page
@@ -31,6 +31,7 @@
 //		V0.4.6	(2015-11-18) * Fixed icon links
 //		V0.4.7	(2015-12-14) * Added null check for ytplayer in tick function
 //							 * Removed iframe url change, used build in playVideo function
+//		V0.4.8	(2016-11-24) * Changed youtube watched marker class
 
 var YTPlay = {
 	vidClass: "yt-lockup-thumbnail contains-addto",
@@ -78,7 +79,7 @@ var YTPlay = {
 			if(YTPlay.loadAll){
 				idx = thumbs.length < YTPlay.maxVids ? 0 : YTPlay.watchThreshold;
 			}else {
-				if(thumbs[t_i].getAttribute("class").indexOf('watched') >= 0){
+				if(thumbs[t_i].getAttribute("class").indexOf('contains-percent-duration-watched') >= 0){
 					idx++;
 					
 					if(idx >= YTPlay.watchThreshold){
