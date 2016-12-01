@@ -79,7 +79,7 @@ var YTPlay = {
 			if(YTPlay.loadAll){
 				idx = thumbs.length < YTPlay.maxVids ? 0 : YTPlay.watchThreshold;
 			}else {
-				if(thumbs[t_i].getAttribute("class").indexOf('contains-percent-duration-watched') >= 0){
+				if(thumbs[t_i].getAttribute("class").indexOf('watched') >= 0){
 					idx++;
 					
 					if(idx >= YTPlay.watchThreshold){
