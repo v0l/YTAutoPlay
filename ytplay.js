@@ -1,14 +1,13 @@
-// V0.4.8 - Youtube smart playlist
-// 2016-11-24
+// V1.0.0 - Youtube subscriptions auto-play
+// 2018-02-19
 //
 // ABOUT:
 //		This script is designed to play all unwatched videos that are loaded on the page
 //		It is most usefull for people who have a lot of music channel subscriptions and want to keep up to date
-//		For suggestions and bug reports please email kieran at harkin dot me
 //
 // INSTRUCTIONS:
 //		Open 'My Subscriptions' on youtube.com
-//		Create a bookmark with the following url: javascript:(function(){ var x = document.createElement('script'); x.src = 'https://raw.githubusercontent.com/KieranH92/helpers/master/ytplay.js'; document.getElementsByTagName('body')[0].appendChild(x); }());
+//		Create a bookmark with the following url: javascript:(function(){ var x = document.createElement('script'); x.src = 'https://raw.githubusercontent.com/v0l/YTAutoPlay/master/ytplay.js'; document.getElementsByTagName('body')[0].appendChild(x); }());
 //		Click the new bookmark
 //
 // CHANGELOG:
@@ -32,171 +31,84 @@
 //		V0.4.7	(2015-12-14) * Added null check for ytplayer in tick function
 //							 * Removed iframe url change, used build in playVideo function
 //		V0.4.8	(2016-11-24) * Changed youtube watched marker class
+//		V1.0.0	(2018-02-19) * Recode for current Polymer youtube
 
-var YTPlay = {
-	vidClass: "yt-lockup-thumbnail contains-addto",
-	cvid: 0,
-	vids: [],
-	tmLength: null,
-	tmEnd: null,
-	pauseTime: 5,
-	blockPlayer: true,
-	loadAll: false,
-	paused: false,
-	maxVids: 100,
-	watchThreshold: 3,
-	playerWidth: window.innerWidth / 2,
-	playerHeight: (window.innerHeight / 2) + 44,
+(function() {
+	this.pagesLoaded = 0;
+	this.loadPagesMax = 10;
+	this.loadMoreTrigger = 3;
+	this.playerWidth = window.innerWidth / 2;
+	this.playerHeight = (window.innerHeight / 2) + 44;
+	this.VideoQueue = [];
 	
-	getPlayer: function() {
-		var ytplayer_window = document.getElementById("playerFrame").contentWindow;
-		return ytplayer_window.yt !== undefined ? ytplayer_window.yt.player.getPlayerByElement(ytplayer_window.player) : null;
-	},
-	paseTime: function(sec){
-		var mins = Math.floor(sec / 60.0);
-		var secs = Math.floor(sec % 60);
+	this.Init = function() {		
+		document.querySelector('ytd-section-list-renderer').addEventListener('yt-next-continuation-data-updated', this.LoadMoreCompleted.bind(this));
+		this.CollectVids();
+	};
+	
+	this.CollectVids = function() {
+		var vids = document.querySelectorAll('ytd-grid-video-renderer');
+		var lmt = 0;
 		
-		return mins + ":" + (secs < 10 ? '0' + secs : secs)
-	},
-	tick: function() {
-		var ytplayer = YTPlay.getPlayer();
-		if(ytplayer !== undefined && ytplayer !== null)
-		{
-			var state = ytplayer.getProgressState();
-			var data = ytplayer.getVideoData();
-			
-			if(state.current >= state.duration){
-				YTPlay.next();
-			}else{
-				YTPlay.status("Now playing: <a href=\"https://www.youtube.com/watch?v=" + data.video_id + "\" target=\"_blank\">" + (data.title.length > 50 ? data.title.substring(0,50) + "..." : data.title) + " (" + YTPlay.paseTime(state.current) + " / " + YTPlay.paseTime(state.duration) + ")</a> <small>(" + YTPlay.cvid + "/" + YTPlay.vids.length + ")</small>");
-			}
-		}
-	},
-	loadMore: function(){
-		var thumbs = document.getElementsByClassName(YTPlay.vidClass);
-		var idx = 0;
-		for(var t_i = 0; t_i < thumbs.length; t_i++){
-			if(YTPlay.loadAll){
-				idx = thumbs.length < YTPlay.maxVids ? 0 : YTPlay.watchThreshold;
-			}else {
-				if(thumbs[t_i].getAttribute("class").indexOf('watched') >= 0){
-					idx++;
-					
-					if(idx >= YTPlay.watchThreshold){
-						break;
-					}
-				}else{
-					idx = 0;
-				}
-			}
-		}
-
-		if(idx <= YTPlay.watchThreshold - 1){
-			YTPlay.status("Loading more videos... (" + thumbs.length + ")");
-			var btns = document.getElementsByClassName('load-more-button');
-			if(btns.length > 0){
-				btns[0].click();
-				setTimeout(YTPlay.loadMore,1000);
-			}else{
-				YTPlay.initDone();
-			}
-		}else {
-			YTPlay.initDone();
-		}
-	},
-	skip: function(){
-		
-		YTPlay.next();
-	},
-	pause: function(){
-		//Change button styles
-		var btn = document.getElementById("pauseButton");
-		btn.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_play_arrow_white_24dp.png')";
-		btn.onclick = function() { YTPlay.resume(); };
-		
-		YTPlay.paused = true;
-		YTPlay.getPlayer().pauseVideo();
-	},
-	resume: function(){
-		if(YTPlay.paused){
-			//Change button styles
-			var btn = document.getElementById("pauseButton");
-			btn.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_pause_white_24dp.png')";
-			btn.onclick  = function() { YTPlay.pause(); };
-			
-			YTPlay.paused = false;
-			YTPlay.getPlayer().playVideo();
-		}else{
-			YTPlay.status("Can't resume if the video was never paused");
-		}
-	},
-	prev: function() {
-		if(YTPlay.cvid + 2 >= YTPlay.vids.length){
-			YTPlay.status("Can't go back any further, please load more videos to go back further");
-		}else {
-			YTPlay.cvid+=2;
-			YTPlay.skip();
-		}
-	},
-	next: function(){
-		if(YTPlay.cvid >= 0){
-			var v = YTPlay.vids[YTPlay.cvid];
-			
-			var btn = document.getElementById("pauseButton");
-			btn.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_pause_white_24dp.png')";
-			btn.onclick  = function() { YTPlay.pause(); };
-			
-			var pl = YTPlay.getPlayer();
-			if(pl === null){
-				document.getElementById("playerFrame").src = "https://www.youtube.com/embed/" + v + "?autoplay=1&controls=0&enablejsapi=1";
-			}else{
-				YTPlay.getPlayer().loadVideoById(v);
+		for(var x = 0; x < vids.length; x++) {
+			var vd = vids[x].data;
+			if(!vd.isWatched) {
+				lmt = 0;
+				this.VideoQueue.push(vd.videoId);
+			} else {
+				lmt++;
 			}
 			
-			YTPlay.cvid--;
-		}else{
-			YTPlay.status("All vids watched - removing embedded controls");
-			YTPlay.close();
+			if(lmt >= this.loadMoreTrigger){
+				console.log("No more will be loaded, reached threshold " + this.loadMoreTrigger + " videos watched in a row");
+				this.StartPlayer();
+				break;
+			}
 		}
-	},
-	status: function(msg){
-		var st = document.getElementById('statusLabel');
-		if(st != null) {
-			st.innerHTML = msg;
+		if(this.pagesLoaded < this.loadPagesMax) {
+			if(lmt < this.loadMoreTrigger) {
+				this.LoadMore();
+			}
+		} else {
+			this.StartPlayer();
+			console.log("No more will be loaded, reached threshold loadPagesMax");
 		}
-	},
-	close: function() {
-		var div = document.getElementById("playControls");
-		div.parentNode.removeChild(div);
-	},
-	initIFramePlayWindow: function() {
-		if(YTPlay.blockPlayer){
-			var gl = document.createElement('div');
-			gl.style.width = YTPlay.playerWidth + "px";
-			gl.style.height = (YTPlay.playerHeight - 34) + "px";
-			gl.style.marginTop = "34px";
-			gl.style.position = "absolute";
-			document.getElementById('playControls').appendChild(gl);
-		}
-		var player = document.createElement('iframe');
-		player.style.width = YTPlay.playerWidth + "px";
-		player.style.height = (YTPlay.playerHeight - 34) + "px";
-		player.id = "playerFrame";
-		player.frameborder = "0";
-		player.src = "";
-		
-		document.getElementById('playControls').appendChild(player);
-	},
-	initPlayControls: function() {
+	};
+	
+	this.LoadMoreCompleted = function(ev) {
+		setTimeout(function() {
+			this.pagesLoaded++;
+			this.CollectVids();
+		}.bind(this), 100);
+	};
+	
+	this.LoadMore = function() {
+		console.log("Loading page: " + this.pagesLoaded);
+		document.querySelector("yt-next-continuation").trigger();
+	};
+	
+	this.StartPlayer = function() {
+		this.CreateOverlay();
+	};
+	
+	this.GetPlayer = function(){
+		return this.player.contentDocument.querySelector('#player').firstChild;
+	};
+	
+	this.UpdateStatus = function() {
+		this.Status.innerHTML = this.VideoQueue.length + " videos left";
+	};
+	
+	this.CreateOverlay = function(){
 		//Container
 		var pl = document.createElement('div');
-		pl.id = 'playControls';
-		pl.style.width = YTPlay.playerWidth + "px";
-		pl.style.height = YTPlay.playerHeight + "px";
+		pl.id = 'sapPlayer';
+		pl.style.width = this.playerWidth + "px";
+		pl.style.height = this.playerHeight + "px";
 		pl.style.top = "0px";
-		pl.style.marginLeft = ((window.innerWidth / 2) - (YTPlay.playerWidth / 2)) + "px";
+		pl.style.marginLeft = ((window.innerWidth / 2) - (this.playerWidth / 2)) + "px";
 		pl.style.marginRight = "auto";
-		pl.style.marginTop = ((window.innerHeight / 2) - (YTPlay.playerHeight / 2)) + "px";
+		pl.style.marginTop = ((window.innerHeight / 2) - (this.playerHeight / 2)) + "px";
 		pl.style.position = "fixed";
 		pl.style.border = "1px solid #888";
 		pl.style.borderRadius = "5px";
@@ -205,68 +117,38 @@ var YTPlay = {
 		pl.style.padding = "10px";
 		pl.style.color = "#fff";
 		
-		//Prev
-		var pr = document.createElement('div');
-		pr.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/navigation/1x_web/ic_chevron_left_white_24dp.png')";
-		pr.style.width = "24px";
-		pr.style.height = "24px";
-		pr.style.float = "left";
-		pr.style.marginBottom = "10px";
-		pr.onclick = function() { YTPlay.prev(); };
-		pl.appendChild(pr);
-		
-		//Pause
-		var ps = document.createElement('div');
-		ps.id = "pauseButton";
-		ps.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/av/1x_web/ic_play_arrow_white_24dp.png')";
-		ps.style.width = "24px";
-		ps.style.height = "24px";
-		ps.style.float = "left";
-		ps.onclick = function() { YTPlay.pause(); };
-		pl.appendChild(ps);
-		
 		//Skip
 		var sk = document.createElement('div');
 		sk.style.backgroundImage = "url('https://raw.githubusercontent.com/google/material-design-icons/master/navigation/1x_web/ic_chevron_right_white_24dp.png')";
 		sk.style.width = "24px";
 		sk.style.height = "24px";
 		sk.style.float = "left";
-		sk.onclick = function() { YTPlay.next(); };
+		sk.onclick = function() { 
+			this.GetPlayer().loadVideoById(this.VideoQueue.pop());
+			this.UpdateStatus();
+		}.bind(this);
+		
 		pl.appendChild(sk);
-		
+
 		//status
-		var st = document.createElement('b');
-		st.id = "statusLabel";
-		st.style.float = "left";
-		st.style.lineHeight = "24px";
-		pl.appendChild(st);
+		this.Status = document.createElement('div');
+		this.Status.style.float = "left";
+		this.Status.style.lineHeight = "24px";
+		pl.appendChild(this.Status);
 		
-		document.getElementsByTagName('body')[0].appendChild(pl);
-	},
-	init: function(){
-		YTPlay.initPlayControls();
-		YTPlay.loadMore();
-	},
-	initDone: function() {
-		var thumbs = document.getElementsByClassName(YTPlay.vidClass);
-		for(var t_i = 0; t_i < thumbs.length; t_i++){
-			if(thumbs[t_i].getAttribute("class").indexOf('watched') < 0 || YTPlay.loadAll){
-				var v = thumbs[t_i].firstChild.getAttribute("href");
-				var v_c = v.substring(v.indexOf('?')+3);
-				YTPlay.status("Adding vid: " + v_c);
-				YTPlay.vids[YTPlay.vids.length] = v_c;
-			}
-		}
+		this.player = document.createElement('iframe');
+		this.player.style.width = this.playerWidth + "px";
+		this.player.style.height = (this.playerHeight - 34) + "px";
+		this.player.style.border = "none";
+		this.player.src = "https://www.youtube.com/embed/" + this.VideoQueue.pop() + "?autoplay=1&enablejsapi=1";
+		pl.appendChild(this.player);
 		
-		if(YTPlay.vids.length > 0){
-			YTPlay.cvid = YTPlay.vids.length - 1;
-			YTPlay.initIFramePlayWindow();
-			YTPlay.next();
-			setInterval(YTPlay.tick,1000);
-		}else{
-			alert("No videos to watch!");
-			YTPlay.close();
-		}
-	}
-};
-YTPlay.init();
+		this.UpdateStatus();
+		
+		document.querySelector('body').appendChild(pl);
+	};
+	
+	this.Init();
+	
+	return this;
+})();
