@@ -40,6 +40,7 @@
 	this.playerWidth = window.innerWidth / 2;
 	this.playerHeight = (window.innerHeight / 2) + 44;
 	this.VideoQueue = [];
+	this.VideoElementTag = document.querySelector('ytd-button-renderer.ytd-menu-renderer[disabled]').data.tooltip === 'Grid' ? 'ytd-grid-video-renderer' : 'ytd-video-renderer';
 	
 	this.Init = function() {		
 		document.querySelector('ytd-section-list-renderer').addEventListener('yt-next-continuation-data-updated', this.LoadMoreCompleted.bind(this));
@@ -47,7 +48,7 @@
 	};
 	
 	this.CollectVids = function() {
-		var vids = document.querySelectorAll('ytd-grid-video-renderer');
+		var vids = document.querySelectorAll(this.VideoElementTag);
 		var lmt = 0;
 		
 		for(var x = 0; x < vids.length; x++) {
@@ -149,6 +150,4 @@
 	};
 	
 	this.Init();
-	
-	return this;
 })();
