@@ -90,6 +90,17 @@
 	
 	this.StartPlayer = function() {
 		this.CreateOverlay();
+		this.tickInterval = setInterval(this.Tick.bind(this), 1000);
+	};
+	
+	this.Tick = function() {
+		var pl = this.GetPlayer();
+		var state = pl.getProgressState();
+		
+		if(state.current >= state.duration){
+			this.GetPlayer().loadVideoById(this.VideoQueue.pop());
+			this.UpdateStatus();
+		}
 	};
 	
 	this.GetPlayer = function(){
